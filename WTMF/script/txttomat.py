@@ -14,7 +14,7 @@ with open(infile, 'r') as f:
         # sys.exit()
 
 matout = {
-        'P': n.array(p_in),
+        'P': n.array(p_in).T,
         'dim': 100,
         'lambda': 20,
         'w_m': 0.01,
