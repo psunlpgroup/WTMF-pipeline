@@ -64,10 +64,10 @@ def getVectorization(DATA, MODEL):
         num = PPTW + pv_dot + lam_identity
         den = (np.matmul(pv, vals))
         if (p == 1):
-            print num[10,:]
-            print den
+            print (num[10,:])
+            print (den)
         V[:,p] = np.linalg.lstsq(num, den)[0]
-    print V
+    print (V)
 
 
     ret = []
