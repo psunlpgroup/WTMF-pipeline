@@ -9,10 +9,12 @@ p_in = []
 with open(infile, 'r') as f:
     f.readline()
     for l in f:
-        p_in.append(map(float, l.split()))
+        p_in.append(list(map(float, l.split())))
+        # print(p_in)
+        # sys.exit()
 
 matout = {
-        'P': n.array(p_in).T,
+        'P': n.array(p_in),
         'dim': 100,
         'lambda': 20,
         'w_m': 0.01,
@@ -20,4 +22,4 @@ matout = {
         'n_iters': 20
         }
 
-savemat(infile, matout)
+savemat(infile+".mat", matout)
