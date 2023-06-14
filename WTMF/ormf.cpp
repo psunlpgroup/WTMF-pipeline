@@ -11,19 +11,19 @@ w_m = 0.01, K=100 lambda = 20, alpha = 0.0001 iteration = 20
 #include <fstream>
 #include <assert.h>
 #include <math.h>
-// #include "omp.h"
+#include "omp.h"
 #include <armadillo>
 #include <time.h>
 #include <sys/time.h>
 
-// #define THREAD_NUM 20 
+// #define THREAD_NUM 20
 // #define w_m 0.01
 // #define K 100
 // #define lambda 20
 // #define alpha 0.0001
-// #define iteration 20 
-// #define maxiter 20 
-// #define n_dim 100 
+// #define iteration 20
+// #define maxiter 20
+// #define n_dim 100
 
 using namespace std;
 using namespace arma;
@@ -34,17 +34,18 @@ typedef double VALUE;
 typedef arma::sp_dmat SPARSE_MAT;
 typedef arma::dmat DENSE_MAT;
 typedef arma::dcolvec DENSE_COL;
-// typedef arma::eye EYE_MAT; 
+// typedef arma::eye EYE_MAT;
 
 const char* filename = "train.ind";
 const char* data_file = "output.txt";
+std::string base_dir = "/storage/home/m/mfs6614/WTMF_check/WTMF-pipeline/";
 
 const double w_m = 0.01;
 const int K = 100;
 const int lambda = 20;
 const double alpha = 0.0001;
-const int iteration = 20;
-const int maxiter = 20;
+const int iteration = 6;
+const int maxiter = 6;
 const int n_dim = 100;
 
 
@@ -70,7 +71,7 @@ struct IndexPair {
   vector<Index> i4d;
 };
 
-// Helper: read time; 
+// Helper: read time;
 double read_timer( )
 {
   static bool initialized = false;
@@ -85,7 +86,7 @@ double read_timer( )
   return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
 }
 
-/* Read preprocessed matrix from files 
+/* Read preprocessed matrix from files
    Return a matrix */
 SPARSE_MAT read_matrix(const char *filename, COORD &n_words, COORD &n_docs) {
   COORD rows = 0;
@@ -145,20 +146,23 @@ DENSE_MAT read_matlab_matrix(const char *filename, COORD &n_words) {
   cout << "Analyzing file... ";
   cout.flush();
   fin.open(filename);
-
   DENSE_MAT mat = DENSE_MAT (n_dim, n_words);
+  cout<<"dense mat"<<endl;
 
   string line;
   int i = 0;
   while (getline(fin, line)) {
     auto row = split(line, ',');
-
+    //cout<<"in while i="<<i<<", fin= "<<filename<<endl;
     for (unsigned int j = 0; j < row.size(); j++) {
       mat(i, j) = atof(row[j].c_str());
+      //cout<<" in for, j= "<<j<<endl;
     }
 
     i++;
   }
+  cout<<"fin closing";
+  cout.flush();
   fin.close();
 
 //  mat.print(cout);
@@ -173,7 +177,7 @@ MatrixPair Initialize_PQ(COORD n_words, COORD n_docs) {
 
   arma_rng::set_seed_random();
 
-  pair.p = read_matlab_matrix("P.txt", n_words);
+  pair.p = read_matlab_matrix((base_dir + "WTMF/P.txt").c_str(), n_words);
 
   pair.q = DENSE_MAT(n_dim, n_docs);
   pair.q.zeros();
@@ -181,8 +185,8 @@ MatrixPair Initialize_PQ(COORD n_words, COORD n_docs) {
   return pair;
 }
 
-// Build index from matrix X 
-// Return two list of pointers, correponding to cell array in matlab: i4d, i4w.  
+// Build index from matrix X
+// Return two list of pointers, correponding to cell array in matlab: i4d, i4w.
 IndexPair build_index(SPARSE_MAT X, COORD n_words, COORD n_docs) {
   vector<Index> i4w(n_words);
   vector<Index> i4d(n_docs);
@@ -271,7 +275,7 @@ DENSE_MAT compute_QP(MatrixPair matpair, IndexPair i4pair, int n_docs, int n_wor
   return P;
 }
 
-//  Write matrix into mat file 
+//  Write matrix into mat file
 // void write_mat_data(char* data_file, Mat<double> &data_mat) {
 void write_mat_data(const char* data_file, DENSE_MAT data_mat){
   ofstream out_file;
@@ -295,14 +299,15 @@ void write_mat_data(const char* data_file, DENSE_MAT data_mat){
   out_file.close();
 }
 
-// function [P, Q] = ormf(X, dim, lambda, w_m, alpha, maxiter) 
-// input is: filename for X, dim, lambda, w_m, alpha, max_iter 
-// Output: generate matrix P and write into file 
+// function [P, Q] = ormf(X, dim, lambda, w_m, alpha, maxiter)
+// input is: filename for X, dim, lambda, w_m, alpha, max_iter
+// Output: generate matrix P and write into file
 int main( int argc, char **argv )
 {
   double simulation_time = read_timer();
 
   COORD n_words, n_docs;
+
   SPARSE_MAT X = read_matrix(filename, n_words, n_docs);
 
   MatrixPair matpair = Initialize_PQ(n_words, n_docs);
