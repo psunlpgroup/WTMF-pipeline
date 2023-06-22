@@ -1,7 +1,10 @@
 # WTMF-pipeline
 ## Documentation:
 
-This is the package for running PyrEval (which includes a new variant PyrEval+CR). The current package is written in Python 3.6 and is an update of the original PyrEval version [Link](https://github.com/serenayj/PyrEval/) which used PyrEval 2.7. This version comes with many optimizations and other changes to facilitate experiments and parameter tuning.  In particular, many of the recent and ongoing changes facilitate use of PyrEval for real-time assessment of student writing. (Has been used with Python versions up to 3.9 on MAC OS, does not work as well on Windows.)
+This is the package for running WTMF pipeline. It contains the Python code for a distributional similarity model -- Orthogonal matrix factorization (OrMF), and a perl pipeline that preprocesses the data and uses the OrMF model to extract the latent vectors of short texts.
+
+The OrMF model is an unsupervised dimension reduction algorithm, use the exactly the same information that LSA and LDA exploit, which is word-document co-occurrence, and outperforms LSA and LDA by a large margin (on the sentence similarity data sets).  
+It will train a model on a corpus.  For each short text in the test data, it will find a latent K-dimension vector.  Usually a larger K leads to a better performance.  In this package,  the default value of K is K=100.
 
 Please cite these papers if you use this code. 
 
@@ -29,7 +32,7 @@ python3 train.py
 
 ## How to run locally
 1. Make sure your GCC version is after 5.3
-2. Make sure the armadillo file gets unzipped
+2. Make sure the armadillo file (armadillo-9.800.4.tar.xz) gets unzipped
 
 ## Additional notes
 1. Change the basedir variable in the config.ini to your local project path
